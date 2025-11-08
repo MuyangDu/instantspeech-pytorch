@@ -1,0 +1,87 @@
+defaults:
+  - _self_
+  - local_env: default
+
+# Experiment args
+mode: 'distill' # pretrain or distill
+device: gpu
+precision: 'no'
+eval_only: false
+predict_only: false
+seed: 2137
+
+model:
+  klass: InstantSpeech
+  config_path: './configs/config.json'
+  tokenizer: "english_ipa_tokenizer"
+  cross_attention_prior_type: "beta_binomial"
+  overwrite:
+    n_symbols: 181
+    n_speakers: 1
+    is_teacher: false
+  add_config:
+    is_bf16: false
+  checkpoint_path: './checkpoints/instantspeech_pretrained_ljspeech/checkpoint-pretrain-500000/model.safetensors'
+  teacher_checkpoint_path: './checkpoints/instantspeech_teacher_pretrained_ljspeech/checkpoint-pretrain-500000/model.safetensors'
+  restore_from: ''
+  random_init: true
+  compile: false # Pytorch 2.0
+
+vocoder_model:
+  klass: causal_hifigan
+  ckpt_path: ./ckpts/vocoder.pt
+  sample_rate: 22050
+
+infer:
+  use_logits_processors: false 
+  top_k: 80
+  top_p: 1.0
+  temperature: 0.85
+  max_target_len: 1000
+  max_predict_samples: 20
+
+data:
+  train_filelist_path: "./data/ultrachat/train_filelist_10_200.txt"
+  dev_filelist_path: "./data/ultrachat/dev_filelist_10_200.txt"
+  pitch_mean_path: "./data/ljspeech/pitch/pitch_mean.npy"
+  pitch_std_path: "./data/ljspeech/pitch/pitch_std.npy"
+  max_allowed_duration: 20.0
+  min_allowed_duration_for_test: 10.0
+  num_workers: 4
+
+optim:
+  name: adam
+  base_lr: 2e-4
+  batch_size: 64
+  total_steps: 10000000
+  epochs: -1 # If it's > 0 it overwrites total_steps
+  warmup_steps: 10000
+  lr_scheduler: cosine
+  weight_decay: 0.0
+  grad_clip: 1.0
+  grad_acc: 1
+  final_cosine: 1e-4
+  attn_prior_start_scale_down_step: 10000
+  attn_prior_end_step: 20000
+  use_attn_ctc_loss: true
+  ctc_loss_scale: 0.1
+  ctc_loss_start_step: 50000
+  ctc_loss_end_step: 1e100
+
+eval:
+  every_steps: 10000
+  steps: 500
+  max_num_images: 20
+
+
+checkpoint:
+  every_steps: 10000
+
+logging:
+  every_steps: 100
+  grad_l2: true
+  weights_l2: true
+
+hydra:
+  job:
+    chdir: True
