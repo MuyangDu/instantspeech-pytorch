@@ -43,6 +43,8 @@ def load_model(args):
     vocoder_model, vocoder_hparams = get_vocoder_model(tts_args, tts_config)
     acoustic_model = acoustic_model.cuda()
     vocoder_model = vocoder_model.cuda()
+    acoustic_model = acoustic_model.eval()
+    vocoder_model = vocoder_model.eval()
     return acoustic_model, vocoder_model, vocoder_hparams
 
 

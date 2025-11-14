@@ -82,8 +82,6 @@ Once you received the checkpoint, place it under:
 cktps/vocoder.pt
 ```
 
-The pre-trained checkpoint is **universal** so you can directly use it to train InstantSpeech on your own datasets.
-
 ---
 
 ## Model Training
